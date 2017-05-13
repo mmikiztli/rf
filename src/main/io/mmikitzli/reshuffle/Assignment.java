@@ -19,7 +19,7 @@ public class Assignment<T> {
 
     public Assignment(List<Set<T>> assignment) {
         this.members = new ArrayList<>();
-        this.assignment = assignment;
+        this.assignment = copy(assignment);
         this.memberToGroup = new HashMap<>();
         for (int i = 0; i < assignment.size(); i++) {
             for (T member : assignment.get(i)) {
@@ -27,6 +27,14 @@ public class Assignment<T> {
                 members.add(member);
             }
         }
+    }
+
+    private List<Set<T>> copy(List<Set<T>> assignment) {
+        List<Set<T>> result = new ArrayList<>(assignment.size());
+        for (Set<T> group : assignment) {
+            result.add(new HashSet<>(group));
+        }
+        return result;
     }
 
     public int getNumGroups() {
@@ -39,16 +47,38 @@ public class Assignment<T> {
         members.add(member);
     }
 
-    public Set<T> getGroup(T member) {
-        return assignment.get(memberToGroup.get(member));
+    public void remove(T member) {
+        if (memberToGroup.containsKey(member)) {
+            int group = memberToGroup.get(member);
+            assignment.get(group).remove(member);
+            members.remove(member);
+            memberToGroup.remove(member);
+        }
+    }
+
+    public Set<T> groupOf(T member) {
+        return new HashSet<>(assignment.get(memberToGroup.get(member)));
+    }
+
+    public Set<T> getGroup(int i) {
+        return new HashSet<>(assignment.get(i));
     }
 
     public List<T> getMemberList() {
-        return members;
+        return new ArrayList<>(members);
     }
 
     public List<Set<T>> getGroups() {
-        return assignment;
+        return copy(assignment);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder output = new StringBuilder();
+        for (int i = 0; i < assignment.size(); i++) {
+            Set<T> group = assignment.get(i);
+            output.append(String.format("%d: %s\n", i, group.toString()));
+        }
+        return output.toString();
+    }
 }
